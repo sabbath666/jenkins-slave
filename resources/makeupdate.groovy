@@ -22,6 +22,7 @@ try {
         fileList.each {
             files << "$it\n"
         }
+        files<<"\nupgrade.yml"
     }
 }
 catch (Exception ex){
