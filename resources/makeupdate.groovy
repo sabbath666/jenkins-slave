@@ -14,12 +14,12 @@ def version = config.upgrade.version
 def upgradeScript = "./scr$version" as File
 if (upgradeScript.isFile()) upgradeScript.delete()
 upgradeScript << "# UPGRADE $version SHARE\n"
-upgradeScript << "## DATE : ${sf.format(new Date())}\n"
-upgradeScript << "################ TARGET SYSTEMS ################\n"
+//upgradeScript << "## DATE : ${sf.format(new Date())}\n"
+upgradeScript << "\n"
 config.upgrade.target.each {
     upgradeScript << "#ADDRESS \$LIST_DBNAME ${it.key}  ${it.value}\n"
 }
-upgradeScript << "#################### FILES #####################\n"
+upgradeScript << "\n"
 File files = 'changed_files.chg' as File
 
 if (!files.text.contains('upgrade.yml')) throw new RuntimeException("Please, execute upgrade.groovy!!")
@@ -43,11 +43,15 @@ files.readLines().each {
 
 Files.copy(Paths.get(upgradeScript.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, upgradeScript.name).canonicalPath))
 
-"tar -C ${upgrDir.canonicalPath} -cvf upgr${version}.tar .".execute()
-"scp upgr${version}.tar root@45.55.43.205:/root/users/sabbath".execute()
+def upgr =new File("upgr/${version}")
+upgr.mkdirs()
+
+"tar -C ${upgrDir.canonicalPath} -cvf ${upgr.canonicalPath}/upgr${version}.tar .".execute()
+
+"scp -r ${upgr.canonicalPath} root@45.55.43.205:/root/upgr".execute()
 
 def sql = Sql.newInstance('jdbc:informix-sqli://45.55.43.205:9088/mydb:INFORMIXSERVER=informix', 'sabbath', 'sabbath', 'com.informix.jdbc.IfxDriver')
 def upgradeName = "upgr${version}.tar"
-sql.execute "insert into updates(filename) values ('$upgradeName')"
+sql.execute "insert into updates(filename) values ('$version')"
 
 println "=============> OK <================"
