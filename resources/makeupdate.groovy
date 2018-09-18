@@ -20,19 +20,24 @@ config.upgrade.target.each {
     upgradeScript << "#ADDRESS \$LIST_DBNAME ${it.key}  ${it.value}\n"
 }
 upgradeScript << "#################### FILES #####################\n"
-def files = 'changed_files.chg' as File
+File files = 'changed_files.chg' as File
+
+if (!files.text.contains('upgrade.yml')) throw new RuntimeException("Please, execute upgrade.groovy!!")
+
 files.eachLine {
-    upgradeScript << "makesql \$LIST_DBNAME $it\n"
+    if (!line.contains('upgrade.yml'))
+        upgradeScript << "makesql \$LIST_DBNAME $it\n"
 }
 
 def upgrDir = new File("upgrade")
 upgrDir.mkdirs()
 files.readLines().each {
     def file = new File(it)
-    try{
-        Files.copy(Paths.get(file.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, file.name).canonicalPath))
+    try {
+        if (!line.contains('upgrade.yml'))
+            Files.copy(Paths.get(file.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, file.name).canonicalPath))
     }
-    catch(Exception ex){
+    catch (Exception ex) {
     }
 }
 
@@ -41,8 +46,8 @@ Files.copy(Paths.get(upgradeScript.canonicalPath), Paths.get(new File(upgrDir.ca
 "tar -C ${upgrDir.canonicalPath} -cvf upgr${version}.tar .".execute()
 "scp upgr${version}.tar root@45.55.43.205:/root/users/sabbath".execute()
 
-def sql= Sql.newInstance('jdbc:informix-sqli://45.55.43.205:9088/mydb:INFORMIXSERVER=informix','sabbath','sabbath','com.informix.jdbc.IfxDriver')
-def upgradeName="upgr${version}.tar"
+def sql = Sql.newInstance('jdbc:informix-sqli://45.55.43.205:9088/mydb:INFORMIXSERVER=informix', 'sabbath', 'sabbath', 'com.informix.jdbc.IfxDriver')
+def upgradeName = "upgr${version}.tar"
 sql.execute "insert into updates(filename) values ('$upgradeName')"
 
 println "=============> OK <================"
