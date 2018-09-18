@@ -11,6 +11,18 @@ Yaml parser = new Yaml()
 def sf = new SimpleDateFormat("dd.MM.yyyy HH:mm:SSS")
 def config = parser.loadAs(("src/upgrade.yml" as File).text, Map)
 def version = config.upgrade.version
+
+def fileList=[]
+fileList= config.upgrade.files
+File files = 'changed_files.chg' as File
+if (!fileList.empty){
+    files.delete()
+    files.createNewFile()
+    fileList.each{
+        files<<"$it\n"
+    }
+}
+
 def upgradeScript = "./scr$version" as File
 if (upgradeScript.isFile()) upgradeScript.delete()
 upgradeScript << "# UPGRADE $version SHARE\n"
@@ -20,7 +32,7 @@ config.upgrade.target.each {
     upgradeScript << "#ADDRESS \$LIST_DBNAME ${it.key}  ${it.value}\n"
 }
 upgradeScript << "\n"
-File files = 'changed_files.chg' as File
+
 
 if (!files.text.contains('upgrade.yml')) throw new RuntimeException("Please, execute upgrade.groovy!!")
 
