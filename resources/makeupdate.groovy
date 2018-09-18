@@ -12,17 +12,22 @@ def sf = new SimpleDateFormat("dd.MM.yyyy HH:mm:SSS")
 def config = parser.loadAs(("src/upgrade.yml" as File).text, Map)
 def version = config.upgrade.version
 
-def fileList=[]
-fileList= config.upgrade.files
 File files = 'changed_files.chg' as File
-if (!fileList.empty){
-    files.delete()
-    files.createNewFile()
-    fileList.each{
-        files<<"$it\n"
+try {
+    def fileList=[]
+    fileList= config.upgrade.files
+    if (!fileList.empty) {
+        files.delete()
+        files.createNewFile()
+        fileList.each {
+            files << "$it\n"
+        }
     }
 }
+catch (Exception ex){
 
+
+}
 def upgradeScript = "./scr$version" as File
 if (upgradeScript.isFile()) upgradeScript.delete()
 upgradeScript << "# UPGRADE $version SHARE\n"
