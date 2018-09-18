@@ -13,19 +13,21 @@ def config = parser.loadAs(("src/upgrade.yml" as File).text, Map)
 def version = config.upgrade.version
 
 File files = 'changed_files.chg' as File
+def t = files.text
 try {
-    def fileList=[]
-    fileList= config.upgrade.files
+    def fileList = []
+    fileList = config.upgrade.files
     if (!fileList.empty) {
         files.delete()
         files.createNewFile()
         fileList.each {
             files << "$it\n"
         }
-        files<<"\nupgrade.yml"
+        if (t.contains("upgrade.yml"))
+            files << "\nupgrade.yml"
     }
 }
-catch (Exception ex){
+catch (Exception ex) {
 
 
 }
@@ -58,7 +60,7 @@ files.readLines().each {
 
 Files.copy(Paths.get(upgradeScript.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, upgradeScript.name).canonicalPath))
 
-def upgr =new File("upgr/${version}")
+def upgr = new File("upgr/${version}")
 upgr.mkdirs()
 
 "tar -C ${upgrDir.canonicalPath} -cvf ${upgr.canonicalPath}/upgr${version}.tar .".execute()
