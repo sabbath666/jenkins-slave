@@ -24,18 +24,15 @@ File files = 'changed_files.chg' as File
 
 if (!files.text.contains('upgrade.yml')) throw new RuntimeException("Please, execute upgrade.groovy!!")
 
-files.eachLine {
-    if (!it.contains('upgrade.yml'))
-        upgradeScript << "makesql \$LIST_DBNAME $it\n"
-}
-
 def upgrDir = new File("upgrade")
 upgrDir.mkdirs()
 files.readLines().each {
     def file = new File(it)
     try {
-        if (!it.contains('upgrade.yml'))
+        if (!it.contains('upgrade.yml')) {
             Files.copy(Paths.get(file.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, file.name).canonicalPath))
+            upgradeScript << "makesql \$LIST_DBNAME $it\n"
+        }
     }
     catch (Exception ex) {
     }
