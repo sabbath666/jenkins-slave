@@ -51,7 +51,7 @@ files.readLines().each {
     try {
         if (!it.contains('upgrade.yml')) {
             Files.copy(Paths.get(file.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, file.name).canonicalPath))
-            upgradeScript << "makesql \$LIST_DBNAME $it\n"
+            upgradeScript << "makesql \$LIST_DBNAME ${file.name}\n"
         }
     }
     catch (Exception ex) {
