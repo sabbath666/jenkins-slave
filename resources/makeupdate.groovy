@@ -68,7 +68,7 @@ upgr.mkdirs()
 
 "scp -r ${upgr.canonicalPath} root@45.55.43.205:/root/upgr".execute()
 
-"scp -r ${upgrDir.canonicalPath}/upgrade root@45.55.43.205:/root/upgr/$version".execute()
+"scp -r ${upgrDir.canonicalPath} root@45.55.43.205:/root/upgr/$version".execute()
 
 def sql = Sql.newInstance('jdbc:informix-sqli://45.55.43.205:9088/mydb:INFORMIXSERVER=informix', 'sabbath', 'sabbath', 'com.informix.jdbc.IfxDriver')
 def upgradeName = "upgr${version}.tar"
