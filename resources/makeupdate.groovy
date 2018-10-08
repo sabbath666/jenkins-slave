@@ -52,6 +52,7 @@ files.readLines().each {
         if (!it.contains('upgrade.yml')) {
             Files.copy(Paths.get(file.canonicalPath), Paths.get(new File(upgrDir.canonicalPath, file.name).canonicalPath))
             upgradeScript << "makesql \$LIST_DBNAME ${file.name}\n"
+            upgradeScript << "sleep  5000\n"
         }
     }
     catch (Exception ex) {
@@ -65,7 +66,7 @@ upgr.mkdirs()
 
 "tar -C ${upgrDir.canonicalPath} -cvf ${upgr.canonicalPath}/upgr${version}.tar .".execute()
 
-"scp -r ${upgr.canonicalPath} root@45.55.43.205:/root/upgr".execute()
+"scp -r ${upgrDir.canonicalPath} root@45.55.43.205:/root/upgr".execute()
 
 def sql = Sql.newInstance('jdbc:informix-sqli://45.55.43.205:9088/mydb:INFORMIXSERVER=informix', 'sabbath', 'sabbath', 'com.informix.jdbc.IfxDriver')
 def upgradeName = "upgr${version}.tar"
